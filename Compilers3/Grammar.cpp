@@ -14,6 +14,7 @@ int letter = 16;
 
 void removeIndirectLeftRecursion();
 void removeDirectLeftRecursion();
+void leftFactoring();
 
 int main()
 {
@@ -77,7 +78,7 @@ int main()
 			cout << nonTerminals[i] << "\t" << rules[nonTerminals[i]][j] << endl ; 
 		}	
 	}
-	cout << "---------------------------------" << endl ;
+	cout << nonTerminals.size() << "---------------------------------" << endl ;
 
 
 	removeDirectLeftRecursion();
@@ -90,6 +91,8 @@ int main()
 			cout << nonTerminals[i] << "\t" << rules[nonTerminals[i]][j] << endl ; 
 		}	
 	}
+	//cout << "Gone " << nonTerminals.size();
+	leftFactoring();
 	return 0;
 }
 
@@ -135,7 +138,7 @@ void removeDirectLeftRecursion()
 	//cout << s;
 
 	int i, j, k;
-	int pos;
+	int pos, count = 0;
 		
 	string temp, str;
 
@@ -147,6 +150,7 @@ void removeDirectLeftRecursion()
 	{
 		s = letter;	
 		//cout << "Non Terminal " << nonTerminals[i] << endl;	
+		count = 0;
 
 		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
 		{
@@ -164,7 +168,9 @@ void removeDirectLeftRecursion()
 				str = temp.substr(pos + 2);
 				x.push_back(str);
 				y.push_back(temp);
-				letter++;
+				if(count == 0)
+					letter++;
+				count++;
 			}
 		}
 
@@ -190,9 +196,68 @@ void removeDirectLeftRecursion()
 		y.clear();
 		found = FALSE;
 	}
+
+	cout << "Aditya " << letter << endl;
 	for(int t = 16; t < letter; t++)
 	{
 		s = t;
 		nonTerminals.push_back(s);		
 	}
+}
+
+void leftFactoring()
+{	
+	int i, j, k, l;
+	int count;
+	vector<vector<int> >lengths;
+	vector<int> x;
+
+	//cout << "Reached";
+	for(i = 0; i < nonTerminals.size(); i++)
+	{
+		//cout << i << endl;
+		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
+				x.push_back(0);
+
+		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
+			lengths.push_back(x);		
+
+		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
+		{
+			for(k = j + 1; k < rules[nonTerminals[i]].size(); k++)
+			{
+				if(rules[nonTerminals[i]][j].length() < rules[nonTerminals[i]][k].length())
+				{
+					for(l = 0; l < rules[nonTerminals[i]][j].length(); l++)
+					{
+						if(rules[nonTerminals[i]][j][l] == rules[nonTerminals[i]][k][l])
+							count++;
+					}
+				}
+				else
+				{
+					for(l = 0; l < rules[nonTerminals[i]][k].length(); l++)
+					{
+						if(rules[nonTerminals[i]][j][l] == rules[nonTerminals[i]][k][l])
+							count++;
+					}
+				}				
+				lengths[j][k] = count / 2;
+				lengths[k][j] = count / 2;
+				count = 0;			
+			}
+																												
+		}
+	}
+
+	for(i = 0; i < lengths.size(); i++)
+	{
+		for(j = 0; j < lengths[i].size(); j++)
+		{
+			cout << lengths[i][j] << " ";
+		}
+		cout << endl;
+	}
+	
+	
 }
