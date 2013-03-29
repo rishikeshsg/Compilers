@@ -1,6 +1,7 @@
-A:x
-A:B
-A:c
-B:#
-B:A
-B:c
+E:T X
+X:+ E
+X:#
+T:( E )
+T:int Y
+Y:* T
+Y:#

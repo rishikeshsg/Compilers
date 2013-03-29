@@ -1,7 +1,8 @@
-A:x
-A:B
-A:c
-B:#
-B:C
-B:c
-C:a
+E:T X
+X:+ T X
+X:#
+T:F Y
+Y:* F Y
+Y:#
+F:( E )
+F:id

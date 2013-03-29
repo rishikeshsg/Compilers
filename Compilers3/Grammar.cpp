@@ -107,7 +107,7 @@ int main()
 
 	//leftFactoring();
 	findFirstSets();
-	//findFollowSets();
+	findFollowSets();
 	return 0;
 }
 
@@ -177,7 +177,7 @@ void removeDirectLeftRecursion()
 			else if(pos == 0)
 			{
 				found = TRUE;
-				cout << "Mil Gaya " << found << endl;
+				//cout << "Mil Gaya " << found << endl;
 				temp = rules[nonTerminals[i]][j];		//Rule to be removed
 				cout << temp << endl;
 				str = temp.substr(pos + 2);
@@ -313,7 +313,7 @@ void findFirstSets()
 
 	vector<string>::iterator iter, iter_v;
 
-	cout << "Before while()" << endl;
+	//cout << "Before while()" << endl;
 
 	for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
 	{	
@@ -332,23 +332,23 @@ void findFirstSets()
 	{
 		result = FALSE;
 
-		cout << "New Iteration" << endl;
+		//cout << "New Iteration" << endl;
 		for(iter = nonTerminals.begin(); iter != nonTerminals.end(); iter++)
 		{
 			for(iter_v = rules[*iter].begin(); iter_v != rules[*iter].end(); iter_v++)
 			{
-				cout << *iter << ":" << *iter_v << "Aditya" << endl;
+				//cout << *iter << ":" << *iter_v << "Aditya" << endl;
 				vector<string> temp;
 				vector<string>::iterator it_temp;
 				split(*iter_v, ' ', temp);
 				for(it_temp = temp.begin(); it_temp != temp.end(); it_temp++)
 				{
-					cout << "Anuj" << *it_temp << endl;
+					//cout << "Anuj" << *it_temp << endl;
 					if(isNonTerminal(*it_temp))
 					{
 						if(!produceEpsilon(*it_temp))
 						{
-							cout << "Ghusa" << endl;
+							//cout << "Ghusa" << endl;
 							set<string>::iterator it_s;
 							if(firstSet.find(*it_temp) != firstSet.end())
 							{						
@@ -377,7 +377,7 @@ void findFirstSets()
 							}
 							
 						}
-						cout << "gaya" << endl ;
+						//cout << "gaya" << endl ;
 					}
 					else
 					{
@@ -395,7 +395,7 @@ void findFirstSets()
 				}				
 			}
 		}
-		for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
+		/*for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
 		{	
 			cout << xy->first << "--> ";
 			for(it = xy->second.begin(); it != xy->second.end(); it++)
@@ -403,13 +403,17 @@ void findFirstSets()
 				cout << *it << "\t";
 			}
 			cout << endl;
-		}
+		}*/
 	
 	}
 
-
+	cout << "Terminals" << endl;
 	for(it = terminals.begin(); it != terminals.end(); it++)
 		cout << *it << endl;
+
+
+	cout << "-------------------------------------" << endl;
+	cout << "First Sets" << endl;
 
 	for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
 	{	
@@ -420,8 +424,6 @@ void findFirstSets()
 		}
 		cout << endl;
 	}
-
-	cout << "Terminals" << terminals.size();
 }
 
 
@@ -502,89 +504,99 @@ bool isNonTerminal(string s)
 void findFollowSets(){
 	set<string>::iterator it;
 	int i,j;
-	map<string ,vector<string> >::iterator x;
+	vector<string>::iterator x;
 	vector<string>::iterator itnt;
 
+	followSet[nonTerminals[0]].insert("$");
 
-	for(i=0;i<=nonTerminals.size()-1;i++){
-		cout<<"ss"<<nonTerminals[i]<<endl;
-		if (nonTerminals[i]=="A"){
-			followSet[nonTerminals[i]].insert("$");
-			//cout<<"\nhurr\n";
-			continue;
-		}
- 		else {
-			followSet[nonTerminals[i]].insert("");
-			//cout<<"working for "<<i<<endl<<nonTerminals[i]<<endl;
-			//insert NULL
-			continue;
-		}
-	}
-	/*vector<string>::iterator iter_vector;
-	for( x=rules.begin();x!=rules.end();x++)
+	for(itnt = nonTerminals.begin(); itnt != nonTerminals.end(); itnt++)
 	{
-		for(iter_vector=x->second.begin();iter_vector<=x->second.end();iter_vector++)
+		for(x = rules[*itnt].begin(); x != rules[*itnt].end(); x++)
 		{
-			cout<<"aaa";
-			cout<<iter_vector[0]<<endl;
+			vector<string> temp;
+			int k;
+			split(*x, ' ', temp);
+			for(k = 0; k < temp.size() - 1; k++)
+			{
+				set<string>::iterator it_set;
+				for(it_set = firstSet[temp[k + 1]].begin(); it_set != firstSet[temp[k+1]].end(); it_set++)
+				{
+					if(*it_set != "#")
+						followSet[temp[k]].insert(*it_set);
+				}
+			}
 		}
-	}*/
+	}	
 
-	vector<string>::iterator iter, iter_v;	
+
+	map<string ,set<string> >::iterator xy;
+	set<string>::iterator z;
+
+	cout << endl;
+	for(xy = followSet.begin(); xy != followSet.end(); xy++)
+	{
+		cout << xy->first << "--> " ;
+		for(z = xy->second.begin(); z != xy->second.end(); z++)
+			cout << *z << " ";
+		cout << endl;
+		
+	}
+
 	bool result = TRUE;
-	cout<<"Creating Follow Sets\n";
+
 	while(result)
 	{
 		result = FALSE;
-		for(iter = nonTerminals.begin(); iter != nonTerminals.end(); iter++)
+		for(itnt = nonTerminals.begin(); itnt != nonTerminals.end(); itnt++)
 		{
-			for(iter_v = rules[*iter].begin(); iter_v != rules[*iter].end(); iter_v++)
+			for(x = rules[*itnt].begin(); x != rules[*itnt].end(); x++)
 			{
 				vector<string> temp;
-				vector<string>::iterator it_temp;
-				vector<string>::iterator it_second;
-				split(*iter_v, ' ', temp);
-				for(it_temp = temp.begin(); it_temp != temp.end(); it_temp++)
+				split(*x, ' ', temp);
+				for(i = 0; i < temp.size() - 1; i++)
 				{
-					for(it_second = ++it_temp;it_second !=temp.end(); it_second++)
+					for(j = i + 1; j < temp.size(); j++)
 					{
-						if(!produceEpsilon(*it_second))
-						{	
-							set<string>::iterator it_s;
-							for(it_s = firstSet[*it_second].begin(); it_s != firstSet[*it_second].end(); it_s++)
-								{
-									//if(followSet[*iter].find(*it_s) == followSet[*iter].end())
-									followSet[*it_temp].insert(*it_s);
-									//continue;
-								}
+						if(firstSet[temp[j]].find("#") == firstSet[temp[j]].end())
+							break;
+					}
+					if(j == temp.size())
+					{
+						set<string>::iterator it_s;
+						if(followSet.find(*itnt) != followSet.end())
+						{
+							for(it_s = followSet[*itnt].begin(); it_s != followSet[*itnt].end(); it_s++)
+							{
+								if(followSet[temp[i]].find(*it_s) == followSet[temp[i]].end())
+									result = TRUE;
+								followSet[temp[i]].insert(*it_s);
+							}	
 						}
 					}
-			
-
-
-
-					/*if(isNonTerminal(*it_temp))//*it_temp holds the current nonterminal on RHS
-					{
-						if(!produceEpsilon(*it_temp))
-						{
-							set<string>::iterator it_s;
-							if(followSet.find(*it_temp) != followSet.end())//if follow set contains entry for current non terminal symbol
-							{						
-								for(it_s = followSet[*it_temp].begin(); it_s != followSet[*it_temp].end(); it_s++)
-								{
-									if(followSet[*iter].find(*it_s) == followSet[*iter].end())
-										result = TRUE;
-									followSet[*iter].insert(*it_s);
-								}
-							}
-						}
-						else{
-							
-						}
-					}*/
 				}
-			}
-//			cout<<followSet[*iter]->second[0]<<endl;
+				set<string>::iterator s_it;
+				if(followSet.find(*itnt) != followSet.end())
+				{
+					for(s_it = followSet[*itnt].begin(); s_it != followSet[*itnt].end(); s_it++)
+					{	
+						if(followSet[temp[i]].find(*s_it) == followSet[temp[i]].end())
+							result = TRUE;
+						followSet[temp[i]].insert(*s_it);
+					}
+				}
+			}			
 		}
-	}	
+	}
+
+	cout << "-------------------------------------" << endl;
+	cout << "Follow Sets" << endl;
+	
+	for(xy = followSet.begin(); xy != followSet.end(); xy++)
+	{
+		cout << xy->first << "--> " ;
+		for(z = xy->second.begin(); z != xy->second.end(); z++)
+			cout << *z << " ";
+		cout << endl;
+		
+	}
 }
