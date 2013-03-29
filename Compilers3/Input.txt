@@ -1,4 +1,7 @@
 A:x
 A:B
-B:#
 A:c
+B:#
+B:C
+B:c
+C:a

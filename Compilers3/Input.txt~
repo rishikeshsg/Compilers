@@ -1,5 +1,6 @@
-S:A a
-S:b
-A:A c
-A:S d
-A:#
+A:x
+A:B
+A:c
+B:#
+B:A
+B:c
