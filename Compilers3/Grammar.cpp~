@@ -6,15 +6,24 @@
 #include<string>
 #include<fstream>
 #include<algorithm>
+#include<set>
+#include<sstream>
 using namespace std;
 
-map <string, vector<string> >rules;
+map<string, vector<string> >rules;
 vector<string> nonTerminals;
+set<string> terminals;
+map<string, set<string> >firstSet;
 int letter = 16;
 
 void removeIndirectLeftRecursion();
 void removeDirectLeftRecursion();
 void leftFactoring();
+void findFirstSets();
+bool produceEpsilon(string);
+bool isNonTerminal(string);
+
+vector<string> split(string, char, vector<string>&);
 
 int main()
 {
@@ -69,7 +78,7 @@ int main()
 	cout << rules.size() << endl;
 	cout << "---------------------------------" << endl ;
 
-	//removeIndirectLeftRecursion();
+	removeIndirectLeftRecursion();
 
 	for(int i = 0; i < nonTerminals.size(); i++)
 	{
@@ -81,7 +90,7 @@ int main()
 	cout << nonTerminals.size() << "---------------------------------" << endl ;
 
 
-	//removeDirectLeftRecursion();
+	removeDirectLeftRecursion();
 
 
 	for(int i = 0; i < nonTerminals.size(); i++)
@@ -91,8 +100,11 @@ int main()
 			cout << nonTerminals[i] << "\t" << rules[nonTerminals[i]][j] << endl ; 
 		}	
 	}
-	//cout << "Gone " << nonTerminals.size();
-	leftFactoring();
+	cout << "Gone " << endl;
+	cout << "---------------------------------" << endl ;
+
+	//leftFactoring();
+	findFirstSets();
 	return 0;
 }
 
@@ -197,7 +209,7 @@ void removeDirectLeftRecursion()
 		found = FALSE;
 	}
 
-	cout << "Aditya " << letter << endl;
+	//cout << "Aditya " << letter << endl;
 	for(int t = 16; t < letter; t++)
 	{
 		s = t;
@@ -257,6 +269,229 @@ void leftFactoring()
 			cout << lengths[i][j] << " ";
 		}
 		cout << endl;
+	}	
+}
+
+void findFirstSets()
+{
+	int i, j, k;
+	bool result;
+	vector<string>::iterator pos;
+	vector<string> t;
+	set<string>::iterator it;
+	map<string, set<string> >::iterator xy;
+
+	for(i = 0; i < nonTerminals.size(); i++)
+	{
+		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
+		{
+			split(rules[nonTerminals[i]][j], ' ', t);				
+		}
+		for(j = 0; j < t.size(); j++)
+		{
+			//cout << "Split " << t[j] << endl;
+			pos = find(nonTerminals.begin(), nonTerminals.end(), t[j]);
+			if(pos == nonTerminals.end())
+			{
+				firstSet[t[j]].insert(t[j]);
+				terminals.insert(t[j]);
+			}
+		}
+		result = produceEpsilon(nonTerminals[i]);
+		if(result)
+			firstSet[nonTerminals[i]].insert("#");
+		cout << nonTerminals[i] << "-->" << result << endl;
+	
+		t.clear();
 	}
+
+	t.clear();
+
+	vector<string>::iterator iter, iter_v;
+	
+	result = TRUE;
+	
+	while(result)
+	{
+		result = FALSE;
+		for(iter = nonTerminals.begin(); iter != nonTerminals.end(); iter++)
+		{
+			for(iter_v = rules[*iter].begin(); iter_v != rules[*iter].end(); iter_v++)
+			{
+				vector<string> temp;
+				vector<string>::iterator it_temp;
+				split(*iter_v, ' ', temp);
+				for(it_temp = temp.begin(); it_temp != temp.end(); it_temp++)
+				{
+					if(isNonTerminal(*it_temp))
+					{
+						if(!produceEpsilon(*it_temp))
+						{
+							set<string>::iterator it_s;
+							if(firstSet.find(*it_temp) != firstSet.end())
+							{						
+								for(it_s = firstSet[*it_temp].begin(); it_s != firstSet.end(); it_s++)
+								{
+									if(firstSet[*iter].find(*it_s) == firstSet[*iter].end())
+										result = TRUE;
+									firstSet[*iter].insert(*it_s);
+								}
+							}
+							break;
+						}
+					}
+					else
+					{
+						if(*it_temp != "")
+						{
+							if(firstSet[*iter].find(*it_temp) == firstSet[*iter].end())
+								result = TRUE;
+							firstSet[*iter].insert(*it_temp);
+							break;
+						}
+					}
+				}				
+			}
+		}
+	}
+
+	/*while(result)
+	{
+		result = FALSE;
+	
+		for(i = 0; i < nonTerminals.size(); i++)
+		{
+			for(j = 0; j < rules[nonTerminals[i]].size(); j++)
+			{
+				split(rules[nonTerminals[i]][j], ' ', t);
+			
+				for(k = 0; k < t.size(); k++)
+				{
+					if(isNonTerminal(t[k]))
+					{
+						if(!produceEpsilon(t[k]))
+						{
+							set<string>::iterator x;
+							if(firstSet.find(t[k]) != firstSet.end())
+							{
+								for(x = firstSet[nonTerminals[i]].begin(); x != firstSet[nonTerminals[i]].end(); x++)
+								{
+									if(firstSet[nonTerminals[i]].find(*x) == firstSet[nonTerminals[i]].end())
+										result = TRUE;
+									firstSet[nonTerminals[i]].insert(*x); 
+								}
+							}
+							break;
+						}
+					}
+					else
+					{
+						if(t[k] != "")
+						{
+							if(firstSet[nonTerminals[i]].find(t[k]) == firstSet[nonTerminals[i]].end())
+								result = TRUE;
+							firstSet[nonTerminals[i]].insert(t[k]);
+							break;
+						}
+					}
+				}
+			}
+		}				
+	}*/
+
+	for(it = terminals.begin(); it != terminals.end(); it++)
+		cout << *it << endl;
+
+	for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
+	{	
+		cout << xy->first << "--> ";
+		for(it = xy->second.begin(); it != xy->second.end(); it++)
+		{
+			cout << *it << "\t";
+		}
+		cout << endl;
+	}
+
+	cout << "Terminals" << terminals.size();
+}
+
+
+vector<string> split(string s, char delim, vector<string> &elems)
+{
+        stringstream ss(s);
+        string item;
+        while(getline(ss, item, delim))
+	{
+                elems.push_back(item);
+        }
+        return elems;
+}
+
+bool produceEpsilon(string str)
+{
+	cout << "Called-->" << str << endl;
+	int i, j;
+	vector<string> x;
+	vector<string>::iterator it;
+	bool yes;
+	
+	for(i = 0; i < rules[str].size(); i++)
+	{
+		//cout << "Rules " << rules[str][i] << endl;
+		if(rules[str][i] == "#"){cout << "dir #\n";
+			return TRUE;	}	
+	}
+
+	cout << "Size" << rules[str].size();
+
+	for(i = 0; i < rules[str].size(); i++)
+	{
+		split(rules[str][i], ' ', x);
+
+		//cout << "Length " << rules[str][i] << " " << rules[str][i].length() << endl;
+		int has;
+
+		for(j = 0; j < x.size(); j++)
+		{
+			has = 0;
+			//cout << "x[j] -->" << x[j] << endl;
+		
+			yes = isNonTerminal(x[j]);
+			if(yes)
+			{
+				if(!produceEpsilon(x[j])){ cout << "not produce\n";
+					return FALSE;}
+				else
+					has = 1;
+			}
+			else
+				break;
+		}
+		x.clear();
+		if(has)
+			return TRUE;
+		
+	}	
+	return FALSE;
+
 	
 }
+
+
+
+bool isNonTerminal(string s)
+{
+	vector<string>::iterator it;
+	for(it = nonTerminals.begin(); it != nonTerminals.end(); it++)
+	{
+		if(*it == s)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+
+
+
+
+
