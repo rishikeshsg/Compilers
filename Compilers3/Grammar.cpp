@@ -108,6 +108,99 @@ int main()
 	//leftFactoring();
 	findFirstSets();
 	findFollowSets();
+
+	cout << "--------------------------------" << endl ;
+
+	vector<string> parsingTable[nonTerminals.size()][terminals.size() + 1];
+
+	int i, j;
+	set<string>::iterator iter;
+	vector<string> terminals_temp;
+
+	for(i = 0; i < nonTerminals.size(); i++)
+		cout << i << "-->" << nonTerminals[i] << endl;
+	for(j = 0, iter = terminals.begin(); iter !=  terminals.end(); j++, iter++)
+	{	
+		terminals_temp.push_back(*iter);
+		cout << j << "-->" << *iter << endl ;
+	}
+	terminals_temp.push_back("$");
+	cout << "--------------------------------" << endl ;
+
+	
+
+	for(i = 0; i < nonTerminals.size(); i++)
+	{
+		for(it = rules[nonTerminals[i]].begin(); it != rules[nonTerminals[i]].end(); it++)
+		{
+			vector<string> temp;
+			vector<string>::iterator x;
+			split(*it, ' ', temp);
+			set<string>::iterator it_s;
+			for(x = temp.begin(); x != temp.end(); x++)
+			{
+				cout << *x << endl;
+				for(it_s = firstSet[*x].begin(); it_s != firstSet[*x].end(); it_s++)
+				{
+					if(*it_s != "#")
+					{
+						for(j = 0; j < terminals_temp.size(); j++)
+						{
+							if(terminals_temp[j] == *it_s)
+								parsingTable[i][j].push_back(*it);
+						}					
+					}
+				}
+				if(firstSet[*x].find("#") == firstSet[*x].end())
+					break;
+			}			
+
+			for(x = temp.begin(); x != temp.end(); x++)
+			{
+				//cout << "Not Toot" << *x << endl;
+				if(firstSet[*x].find("#") == firstSet[*x].end())
+				{
+					//cout << "Broken! " << *x << endl;
+					break;
+				}
+			}
+			if(x == temp.end())
+			{
+				for(it_s = followSet[nonTerminals[i]].begin(); it_s != followSet[nonTerminals[i]].end(); it_s++)
+				{
+					for(j = 0; j < terminals_temp.size(); j++)
+					{
+						if(terminals_temp[j] == *it_s)
+							parsingTable[i][j].push_back(*it);
+					}					
+				}
+				if(followSet[nonTerminals[i]].find("$") != followSet[nonTerminals[i]].end())
+				{
+					//cout << "Non Terminal" << nonTerminals[i] << endl;
+					for(j = 0; j < terminals_temp.size(); j++)
+					{
+						if(terminals_temp[j] == "$")
+							parsingTable[i][j].push_back(*it);
+					}					
+
+				}					 
+			}
+		}
+	}
+
+	cout << endl;
+	for(i = 0; i < nonTerminals.size(); i++)
+	{
+		for(j = 0; j < terminals_temp.size(); j++)
+		{
+			if(parsingTable[i][j].empty())
+				cout << "ERR\t";
+			else
+				cout << parsingTable[i][j][0] << "\t" ; 
+		}
+		cout << endl;
+	}
+
 	return 0;
 }
 
