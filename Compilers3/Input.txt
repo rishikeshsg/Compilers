@@ -1,8 +1,7 @@
 E:T X
-X:+ T X
+X:+ E
 X:#
-T:F Y
-Y:* F Y
+T:( E )
+T:int Y
+Y:* T
 Y:#
-F:( E )
-F:id

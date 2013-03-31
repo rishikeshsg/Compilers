@@ -8,6 +8,7 @@
 #include<algorithm>
 #include<set>
 #include<sstream>
+#include<stack>
 using namespace std;
 
 map<string, vector<string> >rules;
@@ -111,7 +112,9 @@ int main()
 
 	cout << "--------------------------------" << endl ;
 
-	vector<string> parsingTable[nonTerminals.size()][terminals.size() + 1];
+	//vector<string> parsingTable[nonTerminals.size()][terminals.size() + 1];
+	string parsingTable[nonTerminals.size()][terminals.size() + 1];
+	
 
 	int i, j;
 	set<string>::iterator iter;
@@ -126,20 +129,26 @@ int main()
 	}
 	terminals_temp.push_back("$");
 	cout << "--------------------------------" << endl ;
+	cout << "Parsing Table" << endl << endl;
 
-	
+	for(i = 0; i < nonTerminals.size(); i++)
+	{
+		for(j = 0; j < terminals_temp.size(); j++)
+			parsingTable[i][j] = "";
+	}	
 
 	for(i = 0; i < nonTerminals.size(); i++)
 	{
 		for(it = rules[nonTerminals[i]].begin(); it != rules[nonTerminals[i]].end(); it++)
 		{
+			cout << "Rule-->" << nonTerminals[i] << ":" << *it << endl;
 			vector<string> temp;
 			vector<string>::iterator x;
 			split(*it, ' ', temp);
 			set<string>::iterator it_s;
 			for(x = temp.begin(); x != temp.end(); x++)
 			{
-				cout << *x << endl;
+				//cout << *x << endl;
 				for(it_s = firstSet[*x].begin(); it_s != firstSet[*x].end(); it_s++)
 				{
 					if(*it_s != "#")
@@ -147,20 +156,35 @@ int main()
 						for(j = 0; j < terminals_temp.size(); j++)
 						{
 							if(terminals_temp[j] == *it_s)
-								parsingTable[i][j].push_back(*it);
+								//parsingTable[i][j].push_back(*it);
+							{
+								if(parsingTable[i][j] == "")
+								{
+									cout << "Inserted " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
+									parsingTable[i][j] = *it;
+								}
+								else
+								{
+									cout << "Returned" << endl;
+									cout << "Grammar not LL(1)" << endl;
+									exit(1);
+								}
+							}
 						}					
 					}
 				}
 				if(firstSet[*x].find("#") == firstSet[*x].end())
+				{
+					cout << "Break! " << *x << endl;
 					break;
+				}
 			}			
 
 			for(x = temp.begin(); x != temp.end(); x++)
 			{
-				//cout << "Not Toot" << *x << endl;
 				if(firstSet[*x].find("#") == firstSet[*x].end())
 				{
-					//cout << "Broken! " << *x << endl;
+					cout << "Broken! " << *x << endl;
 					break;
 				}
 			}
@@ -171,19 +195,43 @@ int main()
 					for(j = 0; j < terminals_temp.size(); j++)
 					{
 						if(terminals_temp[j] == *it_s)
-							parsingTable[i][j].push_back(*it);
+							//parsingTable[i][j].push_back(*it);
+						{
+							if(parsingTable[i][j] == "")
+							{
+								cout << "Inserted1 " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
+								parsingTable[i][j] = *it;
+							}
+							else
+							{
+								cout << "From Here" << endl;
+								cout << "Grammar not LL(1)" << endl;
+								exit(1);
+							}
+						}
 					}					
-				}
+				}/*
 				if(followSet[nonTerminals[i]].find("$") != followSet[nonTerminals[i]].end())
 				{
-					//cout << "Non Terminal" << nonTerminals[i] << endl;
 					for(j = 0; j < terminals_temp.size(); j++)
 					{
 						if(terminals_temp[j] == "$")
-							parsingTable[i][j].push_back(*it);
+							//parsingTable[i][j].push_back(*it);
+						{
+							if(parsingTable[i][j] == "")
+							{
+								cout << "Inserted2 " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
+								parsingTable[i][j] = *it;
+							}
+							else
+							{
+								cout << "Yahan Se" << endl;
+								cout << "Grammar not LL(1)" << endl;
+								exit(1);
+							}
+						}			
 					}					
-
-				}					 
+				}*/					 
 			}
 		}
 	}
@@ -193,14 +241,93 @@ int main()
 	{
 		for(j = 0; j < terminals_temp.size(); j++)
 		{
-			if(parsingTable[i][j].empty())
+			if(parsingTable[i][j] == "")
 				cout << "ERR\t";
 			else
-				cout << parsingTable[i][j][0] << "\t" ; 
+				cout << parsingTable[i][j] << "\t" ; 
 		}
 		cout << endl;
 	}
+	cout << "--------------------------------" << endl ;
+	//string s;
+	//s = parsingTable[0][5][0];
+	//cout << s ;
 
+	string input;
+	cout << "Enter an input string:" << endl;
+	getline(cin, input);
+	cout << input << endl;
+	
+	vector<string>inp_split;
+	split(input, ' ', inp_split);
+	inp_split.push_back("$");
+
+	vector<string>::iterator it_inp;
+	stack<string> t;
+	int k;
+	t.push("$");
+	t.push(nonTerminals[0]);
+
+	it_inp = inp_split.begin();
+	for( ; it_inp != inp_split.end(); it_inp++)
+		cout << *it_inp << endl;
+	
+	it_inp = inp_split.begin();
+	
+	while( 1 )	
+	{
+		cout << "TOP--> " << t.top() << " INPUT--> " << *it_inp << endl;
+		if(*it_inp == "$" && t.top() == "$")
+		{
+			cout << "Accepted" << endl;
+			break;
+		}
+		if(t.top() != "$" && terminals.find(t.top()) != terminals.end())
+		{
+			t.pop();
+			it_inp++;
+		}
+		else
+		{
+			for(i = 0; i < nonTerminals.size(); i++)
+			{	
+				if(nonTerminals[i] == t.top())
+					break;
+			}
+			for(j = 0; j < terminals_temp.size(); j++)
+			{	
+				if(terminals_temp[j] == *it_inp)
+					break;
+			}
+			cout << "I--> " << i << " J--> " << j << endl;
+			if(parsingTable[i][j] == "")
+			{
+				cout << "Rejected" << endl;
+				break;
+			}
+			else
+			{
+				cout << "Inside" << endl;
+				t.pop();
+				string str;
+				vector<string> str_v;
+				//vector<string>::iterator str_it;
+				//vector<string>::iterator str1;
+				//str1 = parsingTable[i][j].begin();
+				//cout << *str1;
+				str = parsingTable[i][j];
+				cout << "Entry--> " << str << endl;
+				if(str != "#")
+				{
+					split(str, ' ', str_v);
+					for(k = str_v.size() - 1; k >= 0; k--)
+						t.push(str_v[k]);
+				}
+			}
+			
+		}
+	}
+	
 	return 0;
 }
 
