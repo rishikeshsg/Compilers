@@ -21,10 +21,12 @@ int letter = 16;
 void removeIndirectLeftRecursion();
 void removeDirectLeftRecursion();
 void leftFactoring();
+int findLongestPrefix(int);
 void findFirstSets();
 bool produceEpsilon(string);
 bool isNonTerminal(string);
 void findFollowSets();
+void printGrammar();
 
 vector<string> split(string, char, vector<string>&);
 
@@ -38,10 +40,10 @@ int main()
 	vector<string>::iterator it;
 
 	infile.open("Input.txt", ifstream::in);
-	
+
 	while(getline(infile, rule))
 	{
-		cout << rule << endl;
+		//cout << rule << endl;
 		int i;
 		i = 0;
 		while(rule[i] != ':')
@@ -55,8 +57,8 @@ int main()
 			right = right + rule[i];
 			i++;
 		}		
-		cout << left << endl;
-		cout << right << endl;				
+		//cout << left << endl;
+		//cout << right << endl;				
 		
 		rules[left].push_back(right);
 
@@ -70,49 +72,38 @@ int main()
 	}
 	infile.close();
 
-	for(int i = 0; i < nonTerminals.size(); i++)
-	{
-		for(int j = 0; j < rules[nonTerminals[i]].size(); j++)
-		{
-			cout << nonTerminals[i] << "\t" << rules[nonTerminals[i]][j] << endl ; 
-		}	
-	}
-	cout << nonTerminals.size() << endl; 
-	cout << rules.size() << endl;
+	cout << "Original Grammar-->" << endl;
+	printGrammar();
+	//cout << nonTerminals.size() << endl; 
+	//cout << rules.size() << endl;
 	cout << "---------------------------------" << endl ;
 
+	cout << "Grammar After Indirect Left Recursion is Eliminated-->" << endl;
 	removeIndirectLeftRecursion();
 
-	for(int i = 0; i < nonTerminals.size(); i++)
-	{
-		for(int j = 0; j < rules[nonTerminals[i]].size(); j++)
-		{
-			cout << nonTerminals[i] << "\t" << rules[nonTerminals[i]][j] << endl ; 
-		}	
-	}
-	cout << nonTerminals.size() << "---------------------------------" << endl ;
+	printGrammar();
+	cout << "---------------------------------" << endl ;
+
+	//cout << nonTerminals.size() << "---------------------------------" << endl ;
 
 
 	removeDirectLeftRecursion();
-
-
-	for(int i = 0; i < nonTerminals.size(); i++)
-	{
-		for(int j = 0; j < rules[nonTerminals[i]].size(); j++)
-		{
-			cout << nonTerminals[i] << "\t" << rules[nonTerminals[i]][j] << endl ; 
-		}	
-	}
-	cout << "Gone " << endl;
+	cout << "Grammar After Direct Left Recursion is Eliminated-->" << endl;
+	printGrammar();
+	
+	//cout << "Gone " << endl;
 	cout << "---------------------------------" << endl ;
 
-	//leftFactoring();
+	leftFactoring();
+
+	cout << "After Left Factoring" << endl;
+	printGrammar();
+	
 	findFirstSets();
 	findFollowSets();
 
 	cout << "--------------------------------" << endl ;
 
-	//vector<string> parsingTable[nonTerminals.size()][terminals.size() + 1];
 	string parsingTable[nonTerminals.size()][terminals.size() + 1];
 	
 
@@ -141,7 +132,7 @@ int main()
 	{
 		for(it = rules[nonTerminals[i]].begin(); it != rules[nonTerminals[i]].end(); it++)
 		{
-			cout << "Rule-->" << nonTerminals[i] << ":" << *it << endl;
+			//cout << "Rule-->" << nonTerminals[i] << ":" << *it << endl;
 			vector<string> temp;
 			vector<string>::iterator x;
 			split(*it, ' ', temp);
@@ -160,12 +151,12 @@ int main()
 							{
 								if(parsingTable[i][j] == "")
 								{
-									cout << "Inserted " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
+									//cout << "Inserted " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
 									parsingTable[i][j] = *it;
 								}
 								else
 								{
-									cout << "Returned" << endl;
+									//cout << "Returned" << endl;
 									cout << "Grammar not LL(1)" << endl;
 									exit(1);
 								}
@@ -175,7 +166,7 @@ int main()
 				}
 				if(firstSet[*x].find("#") == firstSet[*x].end())
 				{
-					cout << "Break! " << *x << endl;
+					//cout << "Break! " << *x << endl;
 					break;
 				}
 			}			
@@ -184,7 +175,7 @@ int main()
 			{
 				if(firstSet[*x].find("#") == firstSet[*x].end())
 				{
-					cout << "Broken! " << *x << endl;
+					//cout << "Broken! " << *x << endl;
 					break;
 				}
 			}
@@ -199,44 +190,23 @@ int main()
 						{
 							if(parsingTable[i][j] == "")
 							{
-								cout << "Inserted1 " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
+								//cout << "Inserted1 " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
 								parsingTable[i][j] = *it;
 							}
 							else
 							{
-								cout << "From Here" << endl;
+								//cout << "From Here" << endl;
 								cout << "Grammar not LL(1)" << endl;
 								exit(1);
 							}
 						}
 					}					
-				}/*
-				if(followSet[nonTerminals[i]].find("$") != followSet[nonTerminals[i]].end())
-				{
-					for(j = 0; j < terminals_temp.size(); j++)
-					{
-						if(terminals_temp[j] == "$")
-							//parsingTable[i][j].push_back(*it);
-						{
-							if(parsingTable[i][j] == "")
-							{
-								cout << "Inserted2 " << *it << " " << nonTerminals[i] << " " << terminals_temp[j] << endl;
-								parsingTable[i][j] = *it;
-							}
-							else
-							{
-								cout << "Yahan Se" << endl;
-								cout << "Grammar not LL(1)" << endl;
-								exit(1);
-							}
-						}			
-					}					
-				}*/					 
+				}					 
 			}
 		}
 	}
 
-	cout << endl;
+	//cout << endl;
 	for(i = 0; i < nonTerminals.size(); i++)
 	{
 		for(j = 0; j < terminals_temp.size(); j++)
@@ -256,7 +226,7 @@ int main()
 	string input;
 	cout << "Enter an input string:" << endl;
 	getline(cin, input);
-	cout << input << endl;
+	//cout << input << endl;
 	
 	vector<string>inp_split;
 	split(input, ' ', inp_split);
@@ -268,13 +238,13 @@ int main()
 	t.push("$");
 	t.push(nonTerminals[0]);
 
-	it_inp = inp_split.begin();
+	/*it_inp = inp_split.begin();
 	for( ; it_inp != inp_split.end(); it_inp++)
 		cout << *it_inp << endl;
-	
+	*/
 	it_inp = inp_split.begin();
 	
-	while( 1 )	
+	while(1)	
 	{
 		cout << "TOP--> " << t.top() << " INPUT--> " << *it_inp << endl;
 		if(*it_inp == "$" && t.top() == "$")
@@ -299,7 +269,7 @@ int main()
 				if(terminals_temp[j] == *it_inp)
 					break;
 			}
-			cout << "I--> " << i << " J--> " << j << endl;
+			//cout << "I--> " << i << " J--> " << j << endl;
 			if(parsingTable[i][j] == "")
 			{
 				cout << "Rejected" << endl;
@@ -307,16 +277,12 @@ int main()
 			}
 			else
 			{
-				cout << "Inside" << endl;
+				//cout << "Inside" << endl;
 				t.pop();
 				string str;
 				vector<string> str_v;
-				//vector<string>::iterator str_it;
-				//vector<string>::iterator str1;
-				//str1 = parsingTable[i][j].begin();
-				//cout << *str1;
 				str = parsingTable[i][j];
-				cout << "Entry--> " << str << endl;
+				//cout << "Entry--> " << str << endl;
 				if(str != "#")
 				{
 					split(str, ' ', str_v);
@@ -324,11 +290,20 @@ int main()
 						t.push(str_v[k]);
 				}
 			}
-			
 		}
 	}
-	
 	return 0;
+}
+
+void printGrammar()
+{
+	for(int i = 0; i < nonTerminals.size(); i++)
+	{
+		for(int j = 0; j < rules[nonTerminals[i]].size(); j++)
+		{
+			cout << nonTerminals[i] << "\t" << rules[nonTerminals[i]][j] << endl ; 
+		}	
+	}
 }
 
 void removeIndirectLeftRecursion()
@@ -350,7 +325,7 @@ void removeIndirectLeftRecursion()
 				else if(pos == 0)
 				{
 					str = rules[nonTerminals[i]][k];
-					temp = str.substr(pos + 2);
+					temp = str.substr(pos + nonTerminals[i].length() + 1);
 
 					it = find(rules[nonTerminals[i]].begin(), rules[nonTerminals[i]].end(), str);
 					rules[nonTerminals[i]].erase(it);
@@ -393,14 +368,15 @@ void removeDirectLeftRecursion()
 			pos = rules[nonTerminals[i]][j].find(nonTerminals[i]);
 
 			if(pos == rules[nonTerminals[i]][j].npos)
-				cout << "Not Found" << endl;
+				//cout << "Not Found" << endl;
+				;
 			else if(pos == 0)
 			{
 				found = TRUE;
 				//cout << "Mil Gaya " << found << endl;
 				temp = rules[nonTerminals[i]][j];		//Rule to be removed
-				cout << temp << endl;
-				str = temp.substr(pos + 2);
+				//cout << temp << endl;
+				str = temp.substr(pos + nonTerminals[i].length() + 1);
 				x.push_back(str);
 				y.push_back(temp);
 				if(count == 0)
@@ -440,60 +416,116 @@ void removeDirectLeftRecursion()
 	}
 }
 
+string longPrefix;
+
+int findLongestPrefix(int x)
+{
+	int size = rules[nonTerminals[x]].size();
+	int oldSize = 0, newSize = 0;
+	longPrefix = "";
+	string seq;
+	for(int i = 0; i < size; i++)
+	{
+		vector<string> temp_i;
+		split(rules[nonTerminals[x]][i], ' ', temp_i);
+		for(int j = i + 1; j < size; j++)
+		{
+			vector<string> temp_j;
+			split(rules[nonTerminals[x]][j], ' ', temp_j);
+			vector<string>::iterator iter_j, iter_i;
+
+			for(iter_i = temp_i.begin(), iter_j = temp_j.begin(); iter_i != temp_i.end() && iter_j != temp_j.end(); iter_i++, iter_j++)
+			{
+				//cout << "ITER_I " << *iter_i << " ITER_J " << *iter_j << endl;
+				if(*iter_i == *iter_j)
+				{
+					seq = seq + *iter_i + " ";
+					newSize++;
+				}
+				else
+					break;
+			}
+			if(oldSize < newSize)
+			{
+				//cout << "Seq " << seq << endl;
+				oldSize = newSize;
+				longPrefix = seq;
+			}
+		}
+	}
+	return oldSize;	
+}
+
 void leftFactoring()
 {	
 	int i, j, k, l;
-	int count;
-	vector<vector<int> >lengths;
-	vector<int> x;
 
-	//cout << "Reached";
+	int longestPrefixLength;
+
+	string newNonTerminal;
+
 	for(i = 0; i < nonTerminals.size(); i++)
 	{
-		//cout << i << endl;
-		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
-				x.push_back(0);
-
-		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
-			lengths.push_back(x);		
-
-		for(j = 0; j < rules[nonTerminals[i]].size(); j++)
+		int count = 0;
+		while(count != 999)
 		{
-			for(k = j + 1; k < rules[nonTerminals[i]].size(); k++)
+			longPrefix = "";
+			longestPrefixLength = findLongestPrefix(i);
+			//cout << "Loong " << longestPrefixLength << endl;
+			string seq = longPrefix;
+			if(longestPrefixLength > 0)
 			{
-				if(rules[nonTerminals[i]][j].length() < rules[nonTerminals[i]][k].length())
-				{
-					for(l = 0; l < rules[nonTerminals[i]][j].length(); l++)
-					{
-						if(rules[nonTerminals[i]][j][l] == rules[nonTerminals[i]][k][l])
-							count++;
-					}
-				}
-				else
-				{
-					for(l = 0; l < rules[nonTerminals[i]][k].length(); l++)
-					{
-						if(rules[nonTerminals[i]][j][l] == rules[nonTerminals[i]][k][l])
-							count++;
-					}
-				}				
-				lengths[j][k] = count / 2;
-				lengths[k][j] = count / 2;
-				count = 0;			
-			}
-																												
-		}
-	}
+				newNonTerminal = letter;
+				string newRule = "";
+				letter++;
+				int flag = 0;
 
-	for(i = 0; i < lengths.size(); i++)
-	{
-		for(j = 0; j < lengths[i].size(); j++)
-		{
-			cout << lengths[i][j] << " ";
-		}
-		cout << endl;
-	}	
+				//cout << "Reached " << rules[nonTerminals[i]].size() << endl;
+				int q = rules[nonTerminals[i]].size();
+				//cout << endl;				
+				//for(j=0;j<q;j++) cout << "\t" << rules[nonTerminals[i]][j] << "\t";
+				//cout << endl;				
+				for(j = 0;j < q; j++)
+				{
+					//cout << "J " << j << endl;
+					string str = rules[nonTerminals[i]][j];
+					//cout <<"Old Rule-->" << str << endl;
+					string temp;
+					temp = seq.substr(0, seq.length() - 1);
+					if(str.compare(0, seq.length() - 1, temp) == 0)
+					{
+						//cout << "Compared-->" << temp<<"temp" << endl;
+						string oldRule = rules[nonTerminals[i]][j];
+						if(flag == 0)
+						{
+							newRule = seq + newNonTerminal;
+							flag = 1;
+						}	
+						//cout << "Rule removed " << *(rules[nonTerminals[i]].begin() + j) << endl;
+						rules[nonTerminals[i]].erase(rules[nonTerminals[i]].begin() + j);
+						j = -1;
+						q--;
+						string remainRule = oldRule.substr(seq.length() - 1, oldRule.length());
+						if(remainRule == "")
+							remainRule = "#";
+						else if(remainRule[0] == ' ')
+							remainRule = remainRule.substr(1, remainRule.length());
+						//cout << "Remaining Rule-->" << remainRule << endl;
+						rules[newNonTerminal].push_back(remainRule);
+					}
+					
+				}
+				rules[nonTerminals[i]].push_back(newRule);
+				nonTerminals.push_back(newNonTerminal);
+				count++;
+			}
+			else
+				count = 999;			
+		}	
+	}
 }
+
+
 
 void findFirstSets()
 {
@@ -524,7 +556,7 @@ void findFirstSets()
 		result = produceEpsilon(nonTerminals[i]);
 		if(result)
 			firstSet[nonTerminals[i]].insert("#");
-		cout << nonTerminals[i] << "S-->" << result << endl;
+		//cout << nonTerminals[i] << "S-->" << result << endl;
 	
 		t.clear();
 	}
@@ -535,7 +567,7 @@ void findFirstSets()
 
 	//cout << "Before while()" << endl;
 
-	for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
+	/*for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
 	{	
 		cout << xy->first << "--> ";
 		for(it = xy->second.begin(); it != xy->second.end(); it++)
@@ -543,7 +575,7 @@ void findFirstSets()
 			cout << *it << "\t";
 		}
 		cout << endl;
-	}
+	}*/
 
 	
 	result = TRUE;
@@ -563,12 +595,10 @@ void findFirstSets()
 				split(*iter_v, ' ', temp);
 				for(it_temp = temp.begin(); it_temp != temp.end(); it_temp++)
 				{
-					//cout << "Anuj" << *it_temp << endl;
 					if(isNonTerminal(*it_temp))
 					{
 						if(!produceEpsilon(*it_temp))
 						{
-							//cout << "Ghusa" << endl;
 							set<string>::iterator it_s;
 							if(firstSet.find(*it_temp) != firstSet.end())
 							{						
@@ -578,7 +608,7 @@ void findFirstSets()
 										result = TRUE;
 									firstSet[*iter].insert(*it_s);
 								}
-								cout << "END" << endl;
+								//cout << "END" << endl;
 							}
 							break;
 						}
@@ -593,7 +623,7 @@ void findFirstSets()
 										result = TRUE;
 									firstSet[*iter].insert(*it_s);
 								}
-								cout << "END else" << endl;
+								//cout << "END else" << endl;
 							}
 							
 						}
@@ -605,7 +635,7 @@ void findFirstSets()
 						{
 							if(firstSet[*iter].find(*it_temp) == firstSet[*iter].end())
 							{
-								cout << "Insert " << *it_temp << " in first " << *iter << endl; 
+								//cout << "Insert " << *it_temp << " in first " << *iter << endl; 
 								result = TRUE;
 							}
 							firstSet[*iter].insert(*it_temp);
@@ -615,32 +645,22 @@ void findFirstSets()
 				}				
 			}
 		}
-		/*for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
-		{	
-			cout << xy->first << "--> ";
-			for(it = xy->second.begin(); it != xy->second.end(); it++)
-			{
-				cout << *it << "\t";
-			}
-			cout << endl;
-		}*/
-	
 	}
 
-	cout << "Terminals" << endl;
-	for(it = terminals.begin(); it != terminals.end(); it++)
-		cout << *it << endl;
+	//cout << "Terminals" << endl;
+	//for(it = terminals.begin(); it != terminals.end(); it++)
+	//	cout << *it << endl;
 
 
-	cout << "-------------------------------------" << endl;
-	cout << "First Sets" << endl;
+	cout << "---------------------------------" << endl;
+	cout << "First Sets-->" << endl;
 
 	for(xy = firstSet.begin(); xy != firstSet.end(); xy++)
 	{	
 		cout << xy->first << "--> ";
 		for(it = xy->second.begin(); it != xy->second.end(); it++)
 		{
-			cout << *it << "\t";
+			cout << *it << " ";
 		}
 		cout << endl;
 	}
@@ -673,7 +693,7 @@ bool produceEpsilon(string str)
 			return TRUE;	}	
 	}
 
-	cout << "Size" << rules[str].size();
+	//cout << "Size" << rules[str].size();
 
 	for(i = 0; i < rules[str].size(); i++)
 	{
@@ -690,8 +710,8 @@ bool produceEpsilon(string str)
 			yes = isNonTerminal(x[j]);
 			if(yes)
 			{
-				if(!produceEpsilon(x[j])){ cout << "not produce\n";
-					return FALSE;}
+				if(!produceEpsilon(x[j]))//{ cout << "not produce\n";
+					return FALSE;//}
 				else
 					has = 1;
 			}
@@ -701,11 +721,8 @@ bool produceEpsilon(string str)
 		x.clear();
 		if(has)
 			return TRUE;
-		
 	}	
 	return FALSE;
-
-	
 }
 
 
@@ -752,7 +769,7 @@ void findFollowSets(){
 	map<string ,set<string> >::iterator xy;
 	set<string>::iterator z;
 
-	cout << endl;
+	/*cout << endl;
 	for(xy = followSet.begin(); xy != followSet.end(); xy++)
 	{
 		cout << xy->first << "--> " ;
@@ -760,7 +777,7 @@ void findFollowSets(){
 			cout << *z << " ";
 		cout << endl;
 		
-	}
+	}*/
 
 	bool result = TRUE;
 
@@ -813,10 +830,13 @@ void findFollowSets(){
 	
 	for(xy = followSet.begin(); xy != followSet.end(); xy++)
 	{
-		cout << xy->first << "--> " ;
-		for(z = xy->second.begin(); z != xy->second.end(); z++)
-			cout << *z << " ";
-		cout << endl;
+		if(xy->first != "#")
+		{
+			cout << xy->first << "--> " ;
+			for(z = xy->second.begin(); z != xy->second.end(); z++)
+				cout << *z << " ";
+			cout << endl;
+		}
 		
 	}
 }

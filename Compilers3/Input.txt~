@@ -1,7 +1,5 @@
-E:T X
-X:+ E
-X:#
-T:( E )
-T:int Y
-Y:* T
-Y:#
+ES:EA a
+ES:b
+EA:EA c
+EA:ES d
+EA:#
